@@ -1,36 +1,58 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Telepath</title>
-<style>
-html, body
-{
-    height: 100%;
-    margin:0;
-    padding:0;
-}
+  <meta charset="UTF-8">
+  <title>Telepath</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
 
-div {
-    position:relative;
-    height: 100%;
-    width:100%;
-}
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('assembly-line.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 1.0;
+      filter: brightness(50%);
+      z-index: -1;
+    }
 
-div img {
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    margin:auto;
-    height: 200px;
-    max-width: 1000px;
-}
-</style>
+    .content {
+      z-index: 1;
+    }
+
+    .bgimage {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      width: 100%;
+      max-width: 30vw;
+      min-width: 400px;
+      height: auto;
+      z-index: 2;
+      transform: none;
+    }
+
+    @media (max-width: 800px) {
+      .bgimage {
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+  </style>
 </head>
 <body>
-<div>
-<img src="./telepath_large.png">
-</div>
+  <div class="background"></div>
+  <div class="content">
+    <img class="bgimage" src="./telepath-logo-inverted.png" alt="Telepath">
+  </div>
 </body>
-<!-- hold that thought... -->
+<!-- Building something new. -->
 </html>
