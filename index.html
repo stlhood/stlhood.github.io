@@ -10,6 +10,9 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Telepath" />
     <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=PT+Sans&display=swap" rel="stylesheet">
     <meta property="og:url" content="https://telepath.computer">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Telepath">
@@ -64,6 +67,81 @@
           left: 50%;
           transform: translateX(-50%);
         }
+
+        .embeddable-buttondown-form {
+          flex-direction: column;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .embeddable-buttondown-form input[type="email"],
+        .embeddable-buttondown-form input[type="submit"] {
+          width: 100%;
+          max-width: 20rem;
+        }
+      }
+
+      .embeddable-buttondown-form {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 1rem;
+        display: flex;
+        justify-content: right;
+        align-items: baseline;
+        gap: 1rem;
+        z-index: 10;
+        box-sizing: border-box;
+      }
+
+      .embeddable-buttondown-form label {
+        color: white;
+        margin: 0;
+        font-family: 'PT Sans', sans-serif;
+        opacity: 0.8;
+      }
+
+      .embeddable-buttondown-form input[type="email"],
+      .embeddable-buttondown-form input[type="submit"] {
+        height: 2.5rem;
+        box-sizing: border-box;
+        opacity: 0.7;
+        font-family: 'PT Sans', sans-serif;
+        font-size: 120%;
+        line-height: 1.5rem;
+        margin: 0;
+        vertical-align: baseline;
+      }
+
+      .embeddable-buttondown-form input[type="email"]::placeholder {
+        font-family: 'PT Sans', sans-serif;
+      }
+
+      .embeddable-buttondown-form input[type="email"] {
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .embeddable-buttondown-form input[type="submit"] {
+        padding: 0.5rem 1rem;
+        background-color: white;
+        color: black;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .embeddable-buttondown-form input[type="submit"]:hover {
+        background-color: #ffffff;
+        opacity: 1.0;
+      }
+
+      .form-container {
+        background-color: rgba(255, 255, 255, 0.5);
+        padding: 0.6rem;
+        border-radius: 4px;
       }
     </style>
   </head>
@@ -71,6 +149,18 @@
     <div class="background"></div>
     <div class="content">
       <img class="bgimage" src="./telepath-logo-inverted.png" alt="Telepath">
+      <form
+        action="https://buttondown.com/api/emails/embed-subscribe/telepath"
+        method="post"
+        target="popupwindow"
+        onsubmit="window.open('https://buttondown.com/telepath', 'popupwindow')"
+        class="embeddable-buttondown-form"
+      >
+      <div class="form-container">
+        <input type="email" name="email" placeholder="hello@example.com" id="bd-email" />
+        <input type="submit" value="Subscribe" />
+      </div>
+      </form>
     </div>
   </body>
   <!-- Hold that thought... -->
