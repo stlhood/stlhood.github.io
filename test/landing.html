@@ -16,24 +16,19 @@
       font-family: system-ui, -apple-system, sans-serif;
     }
 
-    /* Hide UI elements until JS initializes to prevent flash of wrong state */
+    /* Hide UI elements until JS initializes */
     body.not-ready #wordmark,
     body.not-ready #down-arrow,
     body.not-ready .blurb {
       opacity: 0 !important;
-      transition: none !important;
     }
 
-    /* Scroll container - creates scroll space for presentation slides (1-5)
-       Height must match JS SLIDE_HEIGHTS sum + 100vh buffer.
-       SLIDE_HEIGHTS: 100+100+75+50+150 = 475vh + 100vh buffer = 575vh
-       Background ensures slide6 content isn't visible through it during presentation. */
+    /* Scroll container - height set by JS based on PAGE_HEIGHT_VH */
     .scroll-container {
-      height: 575vh;
       background: #1a1a1e;
     }
 
-    /* Fixed canvas container - opacity controlled by --canvas-opacity CSS var */
+    /* Fixed canvas container - opacity controlled by JS */
     #canvas-container {
       position: fixed;
       top: 0;
@@ -42,7 +37,7 @@
       height: 100vh;
       overflow: hidden;
       pointer-events: none;
-      opacity: var(--canvas-opacity, 0);
+      opacity: 0;
     }
     #canvas-container canvas {
       transform: translateX(-25%);
@@ -53,31 +48,19 @@
       max-height: 100%;
     }
 
-    /* Wordmark */
+    /* Wordmark - static in top-left */
     #wordmark {
       position: fixed;
+      top: 0;
       left: 0;
       right: 0;
-      text-align: center;
-      font-weight: bold;
-      z-index: 100;
-      transition: top 0.5s ease, font-size 0.5s ease, padding 0.5s ease, transform 0.5s ease, background 0.3s ease, border 0.3s ease;
-    }
-    #wordmark.centered {
-      top: 50%;
-      font-size: 4rem;
-      transform: translateY(-100%);
-      padding: 0;
-    }
-    #wordmark.fixed {
-      top: 0;
       font-size: 1.5rem;
-      transform: translateY(0);
+      font-weight: bold;
       padding: 1.5rem;
+      z-index: 100;
     }
-    /* Header bar treatment - background, border and gradient fade in together
-       (controlled by CSS custom property --header-bar-opacity set in JS) */
-    #wordmark.fixed::before {
+    /* Header bar background/border - opacity controlled by --header-bar-opacity */
+    #wordmark::before {
       content: '';
       position: absolute;
       top: 0;
@@ -87,11 +70,10 @@
       background: #1a1a1e;
       border-bottom: 1px solid #444;
       opacity: var(--header-bar-opacity, 0);
-      transition: opacity 0.15s ease;
       z-index: -1;
     }
     /* Gradient fade below header */
-    #wordmark.fixed::after {
+    #wordmark::after {
       content: '';
       position: absolute;
       top: 100%;
@@ -101,67 +83,43 @@
       background: linear-gradient(to bottom, #1a1a1e, transparent);
       pointer-events: none;
       opacity: var(--header-bar-opacity, 0);
-      transition: opacity 0.15s ease;
     }
 
-    /* Down arrow */
-    #down-arrow {
+    /* Down arrow - wrapper handles position animation, inner handles opacity */
+    #down-arrow-wrapper {
       position: fixed;
       bottom: 3rem;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 2rem;
-      opacity: 0;
-      transition: opacity 0.5s ease;
       z-index: 100;
-    }
-    #down-arrow.showing {
-      opacity: 1;
       animation: pulse 2s ease-in-out infinite;
     }
-    #down-arrow.hidden {
-      opacity: 0;
+    #down-arrow {
+      font-size: 2rem;
+      /* opacity controlled by JS */
     }
     @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
-      50% { opacity: 1; transform: translateX(-50%) translateY(10px); }
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
     }
 
-    /* Blurbs - fixed position text that fades in/out with Y translation */
+    /* Blurbs - fixed position text, opacity/transform controlled by JS */
     .blurb {
       position: fixed;
       font-size: 1.5rem;
       line-height: 1.6;
-      transition: opacity 0.5s ease, transform 0.5s ease;
       z-index: 50;
-    }
-    .blurb.hidden-up {
       opacity: 0;
-      transform: translateY(-30px);
-      pointer-events: none;
-    }
-    .blurb.hidden-down {
-      opacity: 0;
-      transform: translateY(30px);
-      pointer-events: none;
-    }
-    .blurb.showing {
-      opacity: 1;
-      transform: translateY(0);
     }
 
-    /* Blurb 1 - centered below wordmark */
+    /* Blurb 1 - centered on screen */
     #blurb1 {
-      top: 55vh;
+      top: 50vh;
       left: 10vw;
       right: 10vw;
       text-align: center;
       font-size: 2rem;
-      transform-origin: center;
     }
-    #blurb1.hidden-up { transform: translateY(-30px); }
-    #blurb1.hidden-down { transform: translateY(30px); }
-    #blurb1.showing { transform: translateY(0); }
 
     /* Blurb 2 - right side, top */
     #blurb2 {
@@ -177,11 +135,7 @@
       right: 5vw;
       width: 40vw;
       text-align: right;
-      transform-origin: right center;
     }
-    #blurb3.hidden-up { transform: translateY(calc(-50% - 30px)); }
-    #blurb3.hidden-down { transform: translateY(calc(-50% + 30px)); }
-    #blurb3.showing { transform: translateY(-50%); }
 
     /* Blurb 5 - right side, centered */
     #blurb5 {
@@ -189,19 +143,12 @@
       right: 5vw;
       width: 40vw;
       text-align: right;
-      transform-origin: right center;
     }
-    #blurb5.hidden-up { transform: translateY(calc(-50% - 30px)); }
-    #blurb5.hidden-down { transform: translateY(calc(-50% + 30px)); }
-    #blurb5.showing { transform: translateY(-50%); }
 
-
-    /* Slide 6 - normal page content
-       Normal document flow after the scroll-container.
-       Fixed overlays (blurbs, wordmark) sit above this during slides 1-5.
-       When fixed overlays hide on slide 6, this content is revealed. */
+    /* Slide 6 - normal page content after scroll container */
     #slide6-content {
-      background: #1a1a1e;
+      position: relative;
+      z-index: 60; /* Above canvas (no z-index) and blurbs (50) */
       padding: 10vh 20%;
       padding-top: calc(1.5rem + 1.5rem + 40px + 5vh); /* wordmark padding + font + gradient + spacing */
       min-height: 100vh;
@@ -273,7 +220,6 @@
       color: #1a1a1e;
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.2s ease;
     }
     .signup-form button:hover {
       background: #ddd;
@@ -294,20 +240,20 @@
       white-space: pre;
     }
   </style>
-  <script type="module" crossorigin src="./assets/landing-iWE7ujjN.js"></script>
+  <script type="module" crossorigin src="./assets/landing-DcMCTphF.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
 <body class="not-ready">
   <div id="wordmark">TELEPATH</div>
-  <div id="down-arrow">↓</div>
+  <div id="down-arrow-wrapper"><div id="down-arrow">↓</div></div>
   <div id="canvas-container"></div>
   <div id="debug"></div>
 
   <!-- Blurbs in reading order for accessibility (screen readers) -->
-  <div id="blurb1" class="blurb hidden-down">Amazing as it is, the personal computer is not a perfected thing.</div>
-  <div id="blurb2" class="blurb hidden-down">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
-  <div id="blurb3" class="blurb hidden-down">But now, they <em>can</em>.</div>
-  <div id="blurb5" class="blurb hidden-down">The Jenga tower of computing is already toppling. Personal computing is about to be reinvented. Again.</div>
+  <div id="blurb1" class="blurb">Amazing as it is, the personal computer is not a perfected thing.</div>
+  <div id="blurb2" class="blurb">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
+  <div id="blurb3" class="blurb">But now, they <em>can</em>.</div>
+  <div id="blurb5" class="blurb">The Jenga tower of computing is already toppling. Personal computing is about to be reinvented. Again.</div>
 
   <div class="scroll-container"></div>
 
@@ -320,8 +266,9 @@
     <p>Please join our waitlist to follow our journey and get early access to our tools and technology.</p>
 
     <div class="founders">
-      <a href="https://www.linkedin.com/in/yetanotherjosh/" target="_blank" rel="noopener">Josh Whiting</a>
+      <a href="https://www.linkedin.com/in/stlhood/" target="_blank" rel="noopener">Stephen Hood</a>
       <a href="https://www.linkedin.com/in/rupertmanfredi/" target="_blank" rel="noopener">Rupert Manfredi</a>
+      <a href="https://www.linkedin.com/in/yetanotherjosh/" target="_blank" rel="noopener">Josh Whiting</a>
     </div>
 
     <div class="signup-form">
