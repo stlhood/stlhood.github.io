@@ -9,6 +9,13 @@
 
     @font-face {
       font-family: "Ivory";
+      src: url("fonts/IvoryLLTrialWeb-Light.woff2") format("woff2");
+      font-weight: 300;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: "Ivory";
       src: url("fonts/IvoryLLTrialWeb-Regular.woff2") format("woff2");
       font-weight: 400;
       font-style: normal;
@@ -207,6 +214,7 @@
     .blurb-display {
       position: absolute;
       font-size: 1.5rem;
+      font-weight: 300;
       line-height: 1.6;
       will-change: transform, opacity;
     }
@@ -285,6 +293,7 @@
       padding: 0 10vw 11vh;
       padding-top: calc(1.5rem + 1.5rem + 40px + 15vh);
       min-height: 100vh;
+      font-weight: 300;
     }
 
     #slide6-content h1 {
@@ -434,9 +443,14 @@
     </div>
 
     <div class="signup-form">
-      <form action="#" method="post">
-        <input type="email" name="email" placeholder="your@email.com" required>
-        <button type="submit">Join waitlist</button>
+      <form
+        action="https://buttondown.com/api/emails/embed-subscribe/telepath"
+        method="post"
+        target="popupwindow"
+        onsubmit="window.open('https://buttondown.com/telepath', 'popupwindow')"
+      >
+        <input type="email" name="email" placeholder="hello@example.com" id="bd-email">
+        <button type="submit">Subscribe</button>
       </form>
     </div>
   </div>
