@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telepath</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      background: #1a1a1e;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    /* Scroll container - creates scroll space for presentation slides (1-5)
+       Initial height set here to prevent flash of slide6 content before JS loads.
+       JS will set the exact height based on SLIDE_HEIGHTS config.
+       Background ensures slide6 content isn't visible through it during presentation. */
+    .scroll-container {
+      height: 500vh; /* fallback: 100+100+100+50+50+100 */
+      background: #1a1a1e;
+    }
+
+    /* Fixed canvas container */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #canvas-container.visible {
+      opacity: 1;
+    }
+    #canvas-container canvas {
+      transform: translateX(-25%);
+    }
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* Wordmark */
+    #wordmark {
+      position: fixed;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-weight: bold;
+      z-index: 100;
+      transition: top 0.5s ease, font-size 0.5s ease, padding 0.5s ease, transform 0.5s ease, background 0.3s ease, border 0.3s ease;
+    }
+    #wordmark.centered {
+      top: 50%;
+      font-size: 4rem;
+      transform: translateY(-100%);
+      padding: 0;
+    }
+    #wordmark.fixed {
+      top: 0;
+      font-size: 1.5rem;
+      transform: translateY(0);
+      padding: 1.5rem;
+    }
+    /* Header bar treatment for slide 6 */
+    #wordmark.fixed.with-background {
+      background: #1a1a1e;
+      border-bottom: 1px solid #333;
+    }
+    /* Gradient fade below header - only on slide 6 */
+    #wordmark.fixed.with-background::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(to bottom, #1a1a1e, transparent);
+      pointer-events: none;
+    }
+
+    /* Down arrow */
+    #down-arrow {
+      position: fixed;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: 100;
+    }
+    #down-arrow.showing {
+      opacity: 1;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    #down-arrow.hidden {
+      opacity: 0;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+      50% { opacity: 1; transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* Blurbs - fixed position text that fades in/out with Y translation */
+    .blurb {
+      position: fixed;
+      font-size: 1.5rem;
+      line-height: 1.6;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      z-index: 50;
+    }
+    .blurb.hidden-up {
+      opacity: 0;
+      transform: translateY(-30px);
+      pointer-events: none;
+    }
+    .blurb.hidden-down {
+      opacity: 0;
+      transform: translateY(30px);
+      pointer-events: none;
+    }
+    .blurb.showing {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Blurb 1 - centered below wordmark */
+    #blurb1 {
+      top: 55vh;
+      left: 10vw;
+      right: 10vw;
+      text-align: center;
+      font-size: 2rem;
+      transform-origin: center;
+    }
+    #blurb1.hidden-up { transform: translateY(-30px); }
+    #blurb1.hidden-down { transform: translateY(30px); }
+    #blurb1.showing { transform: translateY(0); }
+
+    /* Blurb 2 - right side, top */
+    #blurb2 {
+      top: 15vh;
+      right: 5vw;
+      width: 40vw;
+      text-align: right;
+    }
+
+    /* Blurb 3 - right side, centered */
+    #blurb3 {
+      top: 50vh;
+      right: 5vw;
+      width: 40vw;
+      text-align: right;
+      transform-origin: right center;
+    }
+    #blurb3.hidden-up { transform: translateY(calc(-50% - 30px)); }
+    #blurb3.hidden-down { transform: translateY(calc(-50% + 30px)); }
+    #blurb3.showing { transform: translateY(-50%); }
+
+    /* Blurb 5 - right side, centered */
+    #blurb5 {
+      top: 50vh;
+      right: 5vw;
+      width: 40vw;
+      text-align: right;
+      transform-origin: right center;
+    }
+    #blurb5.hidden-up { transform: translateY(calc(-50% - 30px)); }
+    #blurb5.hidden-down { transform: translateY(calc(-50% + 30px)); }
+    #blurb5.showing { transform: translateY(-50%); }
+
+
+    /* Slide 6 - normal page content
+       Normal document flow after the scroll-container.
+       Fixed overlays (blurbs, wordmark) sit above this during slides 1-5.
+       When fixed overlays hide on slide 6, this content is revealed. */
+    #slide6-content {
+      background: #1a1a1e;
+      padding: 10vh 20%;
+      padding-top: calc(1.5rem + 1.5rem + 40px + 5vh); /* wordmark padding + font + gradient + spacing */
+      min-height: 100vh;
+    }
+    #slide6-content h1 {
+      font-size: 3rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    #slide6-content p {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #slide6-content a {
+      color: #7cb3ff;
+      text-decoration: none;
+    }
+    #slide6-content a:hover {
+      text-decoration: underline;
+    }
+    .founders {
+      margin-top: 2rem;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+    .founders a {
+      display: inline-block;
+      margin: 0 1rem;
+      font-size: 1.1rem;
+    }
+
+    /* Email signup form */
+    .signup-form {
+      max-width: 500px;
+      margin: 3rem auto;
+      text-align: center;
+    }
+    .signup-form p {
+      margin-bottom: 1rem;
+    }
+    .signup-form form {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .signup-form input[type="email"] {
+      flex: 1;
+      max-width: 300px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #2d2d2f;
+      color: #fff;
+    }
+    .signup-form input[type="email"]::placeholder {
+      color: #888;
+    }
+    .signup-form button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      background: #fff;
+      color: #1a1a1e;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s ease;
+    }
+    .signup-form button:hover {
+      background: #ddd;
+    }
+
+    /* Debug panel */
+    #debug {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(0,0,0,0.8);
+      color: #0f0;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      z-index: 9999;
+      white-space: pre;
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/landing-BiIhPTPQ.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/LineSegments2-Dq35O2MW.js">
+</head>
+<body>
+  <div id="wordmark" class="centered">TELEPATH</div>
+  <div id="down-arrow" class="showing">↓</div>
+  <div id="canvas-container"></div>
+  <div id="debug"></div>
+
+  <!-- Blurbs in reading order for accessibility (screen readers) -->
+  <div id="blurb1" class="blurb hidden-down">Amazing as it is, the personal computer is not a perfected thing.</div>
+  <div id="blurb2" class="blurb hidden-down">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
+  <div id="blurb3" class="blurb hidden-down">But now, they <em>can</em>.</div>
+  <div id="blurb5" class="blurb hidden-down">The Jenga tower of computing is already toppling. Personal computing is about to be reinvented. Again.</div>
+
+  <div class="scroll-container"></div>
+
+  <!-- Slide 6: Normal page content -->
+  <div id="slide6-content">
+    <p>We see that the true power of AI isn't in mindless automation and generative slop, but rather in its ability to <em>understand users and their intent</em>. This creates the opportunity for a computing revolution even greater and more exciting than the shift from CLI to GUI forty years ago.</p>
+
+    <p>Telepath is building the software stack for this new personal computing experience, from first principles. We call it a <strong>sensemaking computer</strong>. It understands you as a unique user, and it uses that understanding to help you make sense of the flood of information that defines modern life. We believe this will result in a new kind of computer that is more powerful, useful, and <em>joyful</em> than anything that's come before. You can get a sneak peek of our thinking and plans <a href="https://www.youtube.com/watch?v=jEm5SkLMap0" target="_blank" rel="noopener">here</a>.</p>
+
+    <p>Please join our waitlist to follow our journey and get early access to our tools and technology.</p>
+
+    <div class="founders">
+      <a href="https://www.linkedin.com/in/yetanotherjosh/" target="_blank" rel="noopener">Josh Whiting</a>
+      <a href="https://www.linkedin.com/in/rupertmanfredi/" target="_blank" rel="noopener">Rupert Manfredi</a>
+    </div>
+
+    <div class="signup-form">
+      <form action="#" method="post">
+        <input type="email" name="email" placeholder="your@email.com" required>
+        <button type="submit">Join waitlist</button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>
