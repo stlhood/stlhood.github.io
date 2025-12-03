@@ -16,16 +16,24 @@
       font-family: system-ui, -apple-system, sans-serif;
     }
 
+    /* Hide UI elements until JS initializes to prevent flash of wrong state */
+    body.not-ready #wordmark,
+    body.not-ready #down-arrow,
+    body.not-ready .blurb {
+      opacity: 0 !important;
+      transition: none !important;
+    }
+
     /* Scroll container - creates scroll space for presentation slides (1-5)
-       Initial height set here to prevent flash of slide6 content before JS loads.
-       JS will set the exact height based on SLIDE_HEIGHTS config.
+       Height must match JS SLIDE_HEIGHTS sum + 100vh buffer.
+       SLIDE_HEIGHTS: 100+100+75+50+150 = 475vh + 100vh buffer = 575vh
        Background ensures slide6 content isn't visible through it during presentation. */
     .scroll-container {
-      height: 500vh; /* fallback: 100+100+100+50+50+100 */
+      height: 575vh;
       background: #1a1a1e;
     }
 
-    /* Fixed canvas container */
+    /* Fixed canvas container - opacity controlled by --canvas-opacity CSS var */
     #canvas-container {
       position: fixed;
       top: 0;
@@ -34,11 +42,7 @@
       height: 100vh;
       overflow: hidden;
       pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-    #canvas-container.visible {
-      opacity: 1;
+      opacity: var(--canvas-opacity, 0);
     }
     #canvas-container canvas {
       transform: translateX(-25%);
@@ -71,13 +75,23 @@
       transform: translateY(0);
       padding: 1.5rem;
     }
-    /* Header bar treatment for slide 6 */
-    #wordmark.fixed.with-background {
+    /* Header bar treatment - background, border and gradient fade in together
+       (controlled by CSS custom property --header-bar-opacity set in JS) */
+    #wordmark.fixed::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: #1a1a1e;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #444;
+      opacity: var(--header-bar-opacity, 0);
+      transition: opacity 0.15s ease;
+      z-index: -1;
     }
-    /* Gradient fade below header - only on slide 6 */
-    #wordmark.fixed.with-background::after {
+    /* Gradient fade below header */
+    #wordmark.fixed::after {
       content: '';
       position: absolute;
       top: 100%;
@@ -86,6 +100,8 @@
       height: 40px;
       background: linear-gradient(to bottom, #1a1a1e, transparent);
       pointer-events: none;
+      opacity: var(--header-bar-opacity, 0);
+      transition: opacity 0.15s ease;
     }
 
     /* Down arrow */
@@ -278,12 +294,12 @@
       white-space: pre;
     }
   </style>
-  <script type="module" crossorigin src="./assets/landing-BiIhPTPQ.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/LineSegments2-Dq35O2MW.js">
+  <script type="module" crossorigin src="./assets/landing-iWE7ujjN.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
 </head>
-<body>
-  <div id="wordmark" class="centered">TELEPATH</div>
-  <div id="down-arrow" class="showing">↓</div>
+<body class="not-ready">
+  <div id="wordmark">TELEPATH</div>
+  <div id="down-arrow">↓</div>
   <div id="canvas-container"></div>
   <div id="debug"></div>
 
