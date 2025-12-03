@@ -5,18 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Telepath</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@700&display=swap');
+
+    @font-face {
+      font-family: "Ivory";
+      src: url("fonts/IvoryLLTrialWeb-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: "Ivory";
+      src: url("fonts/IvoryLLTrialWeb-Italic.woff2") format("woff2");
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    @font-face {
+      font-family: "Ivory";
+      src: url("fonts/IvoryLLTrialWeb-Bold.woff2") format("woff2");
+      font-weight: 700;
+      font-style: normal;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
     html, body {
       background: #1a1a1e;
       color: #ffffff;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: "Ivory", Georgia, serif;
     }
 
     /* Hide UI elements until JS initializes */
+
     body.not-ready #wordmark,
     body.not-ready #down-arrow,
     body.not-ready .blurb,
@@ -26,6 +51,7 @@
     }
 
     /* Canvas wrapper - defines the scroll region where canvas is visible */
+
     #canvas-wrapper {
       position: relative;
       /* Height = blurbs scroll region + 100vh for the sticky canvas */
@@ -33,6 +59,7 @@
     }
 
     /* Sticky canvas container - sticks at top, pushed up when wrapper ends */
+
     #canvas-container {
       position: sticky;
       top: 0;
@@ -46,6 +73,7 @@
       /* Negative margin so it doesn't add space to document flow */
       margin-bottom: -100vh;
     }
+
     #canvas-container canvas {
       display: block;
       /* Use % instead of vw to avoid scrollbar width mismatch */
@@ -56,21 +84,25 @@
     }
 
     /* Responsive canvas - scale up at smaller viewports */
+
     @media (max-width: 1200px) {
       #canvas-container canvas {
         width: 120%;
       }
     }
+
     @media (max-width: 900px) {
       #canvas-container canvas {
         width: 150%;
       }
     }
+
     @media (max-width: 600px) {
       #canvas-container canvas {
         width: 200%;
       }
     }
+
     @media (max-width: 400px) {
       #canvas-container canvas {
         width: 250%;
@@ -78,17 +110,22 @@
     }
 
     /* Wordmark - static in top-left */
+
     #wordmark {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
+      font-family: "IBM Plex Sans Condensed", sans-serif;
       font-size: 1.5rem;
-      font-weight: bold;
+      font-weight: 700;
+      letter-spacing: 0.25em;
       padding: 1.5rem;
       z-index: 100;
     }
+
     /* Header bar background/border - opacity controlled by --header-bar-opacity */
+
     #wordmark::before {
       content: '';
       position: absolute;
@@ -101,7 +138,9 @@
       opacity: var(--header-bar-opacity, 0);
       z-index: -1;
     }
+
     /* Gradient fade below header */
+
     #wordmark::after {
       content: '';
       position: absolute;
@@ -115,6 +154,7 @@
     }
 
     /* Down arrow - wrapper handles position animation, inner handles opacity */
+
     #down-arrow-wrapper {
       position: fixed;
       bottom: 3rem;
@@ -123,17 +163,21 @@
       z-index: 100;
       animation: pulse 2s ease-in-out infinite;
     }
+
     #down-arrow {
-      font-size: 2rem;
+      font-size: 4rem;
       /* opacity controlled by JS */
     }
+
     @keyframes pulse {
       0%, 100% { transform: translateX(-50%) translateY(0); }
       50% { transform: translateX(-50%) translateY(10px); }
     }
 
     /* Blurbs - normal page content with spacing */
+
     /* Anchor blurbs - invisible, just for scroll position tracking */
+
     .blurb {
       position: relative;
       font-size: 1.5rem;
@@ -147,6 +191,7 @@
     }
 
     /* Fixed overlay for display blurbs */
+
     #blurb-overlay {
       position: fixed;
       top: 0;
@@ -158,6 +203,7 @@
     }
 
     /* Display blurbs - positioned absolutely within the fixed overlay */
+
     .blurb-display {
       position: absolute;
       font-size: 1.5rem;
@@ -166,6 +212,7 @@
     }
 
     /* Anchor blurb 1 - centered, sets scroll geometry */
+
     #blurb1 {
       margin-top: 50svh;
       text-align: center;
@@ -174,12 +221,14 @@
     }
 
     /* Anchor blurbs 2, 3, 5 - right side geometry */
+
     #blurb2, #blurb3 {
       width: 40vw;
       margin-left: auto;
       margin-right: 5vw;
       text-align: right;
     }
+
     #blurb5 {
       width: 40vw;
       margin-left: auto;
@@ -189,6 +238,7 @@
     }
 
     /* Display blurb 1 - centered */
+
     #blurb1-display {
       left: 10vw;
       right: 10vw;
@@ -197,6 +247,7 @@
     }
 
     /* Display blurbs 2, 3, 5 - right side */
+
     #blurb2-display, #blurb3-display, #blurb5-display {
       width: 40vw;
       right: 5vw;
@@ -204,18 +255,21 @@
     }
 
     /* Responsive anchor blurb sizing */
+
     @media (max-width: 900px) {
       #blurb1 { padding: 0 5vw; }
       #blurb2, #blurb3, #blurb5 { width: 60vw; margin-right: 3vw; }
       #blurb1-display { left: 5vw; right: 5vw; }
       #blurb2-display, #blurb3-display, #blurb5-display { width: 60vw; right: 3vw; }
     }
+
     @media (max-width: 600px) {
       #blurb1 { padding: 0 6vw; font-size: 1.5rem; }
       #blurb2, #blurb3, #blurb5 { width: 50vw; margin-right: 6vw; font-size: 1.2rem; }
       #blurb1-display { left: 6vw; right: 6vw; font-size: 1.5rem; }
       #blurb2-display, #blurb3-display, #blurb5-display { width: 50vw; right: 6vw; font-size: 1.2rem; }
     }
+
     @media (max-width: 400px) {
       #blurb1 { padding: 0 6vw; font-size: 1.3rem; }
       #blurb2, #blurb3, #blurb5 { width: 90vw; margin-right: 4vw; font-size: 1.1rem; }
@@ -224,6 +278,7 @@
     }
 
     /* Slide 6 - normal page content */
+
     #slide6-content {
       position: relative;
       z-index: 60;
@@ -231,11 +286,13 @@
       padding-top: calc(1.5rem + 1.5rem + 40px + 15vh);
       min-height: 100vh;
     }
+
     #slide6-content h1 {
       font-size: 3rem;
       margin-bottom: 2rem;
       text-align: center;
     }
+
     #slide6-content p {
       font-size: 1.2rem;
       line-height: 1.8;
@@ -244,18 +301,22 @@
       margin-left: auto;
       margin-right: auto;
     }
+
     #slide6-content a {
       color: #7cb3ff;
       text-decoration: none;
     }
+
     #slide6-content a:hover {
       text-decoration: underline;
     }
+
     .founders {
       margin-top: 2rem;
       margin-bottom: 3rem;
       text-align: center;
     }
+
     .founders a {
       display: inline-block;
       margin: 0 1rem;
@@ -263,19 +324,23 @@
     }
 
     /* Email signup form */
+
     .signup-form {
       max-width: 500px;
       margin: 3rem auto;
       text-align: center;
     }
+
     .signup-form p {
       margin-bottom: 1rem;
     }
+
     .signup-form form {
       display: flex;
       gap: 0.5rem;
       justify-content: center;
     }
+
     .signup-form input[type="email"] {
       flex: 1;
       max-width: 300px;
@@ -286,9 +351,11 @@
       background: #2d2d2f;
       color: #fff;
     }
+
     .signup-form input[type="email"]::placeholder {
       color: #888;
     }
+
     .signup-form button {
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
@@ -299,14 +366,17 @@
       cursor: pointer;
       font-weight: bold;
     }
+
     .signup-form button:hover {
       background: #ddd;
     }
 
     /* Debug panel - hidden when empty */
+
     #debug:empty {
       display: none;
     }
+
     #debug {
       position: fixed;
       bottom: 1rem;
