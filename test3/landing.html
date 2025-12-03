@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telepath</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      background: #1a1a1e;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    /* Hide UI elements until JS initializes */
+    body.not-ready #wordmark,
+    body.not-ready #down-arrow,
+    body.not-ready .blurb,
+    body.not-ready #slide6-content {
+      opacity: 0 !important;
+    }
+
+    /* Fixed canvas container - opacity controlled by JS */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 1;
+    }
+    #canvas-container canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      transform: translateX(-25%);
+    }
+
+    /* Responsive canvas container - larger at smaller viewports */
+    @media (max-width: 1200px) {
+      #canvas-container {
+        width: 120vw;
+        height: 120vh;
+      }
+    }
+    @media (max-width: 900px) {
+      #canvas-container {
+        width: 150vw;
+        height: 150vh;
+      }
+    }
+    @media (max-width: 600px) {
+      #canvas-container {
+        width: 200vw;
+        height: 200vh;
+      }
+    }
+    @media (max-width: 400px) {
+      #canvas-container {
+        width: 250vw;
+        height: 250vh;
+      }
+    }
+
+    /* Wordmark - static in top-left */
+    #wordmark {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 1.5rem;
+      z-index: 100;
+    }
+    /* Header bar background/border - opacity controlled by --header-bar-opacity */
+    #wordmark::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #1a1a1e;
+      border-bottom: 1px solid #444;
+      opacity: var(--header-bar-opacity, 0);
+      z-index: -1;
+    }
+    /* Gradient fade below header */
+    #wordmark::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: linear-gradient(to bottom, #1a1a1e, transparent);
+      pointer-events: none;
+      opacity: var(--header-bar-opacity, 0);
+    }
+
+    /* Down arrow - wrapper handles position animation, inner handles opacity */
+    #down-arrow-wrapper {
+      position: fixed;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    #down-arrow {
+      font-size: 2rem;
+      /* opacity controlled by JS */
+    }
+    @keyframes pulse {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* Blurbs - normal page content with spacing */
+    .blurb {
+      position: relative;
+      font-size: 1.5rem;
+      line-height: 1.6;
+      z-index: 50;
+      /* Spacing between blurbs - creates scroll distance */
+      margin-bottom: 100vh;
+    }
+
+    /* Blurb 1 - centered on screen */
+    #blurb1 {
+      /* Start with space at top for initial view */
+      margin-top: 50vh;
+      text-align: center;
+      font-size: 2rem;
+      padding: 0 10vw;
+    }
+
+    /* Blurb 2 - right side */
+    #blurb2 {
+      width: 40vw;
+      margin-left: auto;
+      margin-right: 5vw;
+      text-align: right;
+    }
+
+    /* Blurb 3 - right side */
+    #blurb3 {
+      width: 40vw;
+      margin-left: auto;
+      margin-right: 5vw;
+      text-align: right;
+    }
+
+    /* Blurb 5 - right side */
+    #blurb5 {
+      width: 40vw;
+      margin-left: auto;
+      margin-right: 5vw;
+      text-align: right;
+      /* Last blurb before slide 6 - add extra space */
+      margin-bottom: 50vh;
+    }
+
+    /* Responsive blurb sizing */
+    @media (max-width: 900px) {
+      #blurb1 {
+        padding: 0 5vw;
+      }
+      #blurb2, #blurb3, #blurb5 {
+        width: 60vw;
+        margin-right: 3vw;
+      }
+    }
+    @media (max-width: 600px) {
+      #blurb1 {
+        padding: 0 6vw;
+        font-size: 1.5rem;
+      }
+      #blurb2, #blurb3, #blurb5 {
+        width: 50vw;
+        margin-right: 6vw;
+        font-size: 1.2rem;
+      }
+    }
+    @media (max-width: 400px) {
+      #blurb1 {
+        padding: 0 6vw;
+        font-size: 1.3rem;
+      }
+      #blurb2, #blurb3, #blurb5 {
+        width: 90vw;
+        margin-right: 4vw;
+        font-size: 1.1rem;
+      }
+    }
+
+    /* Slide 6 - normal page content */
+    #slide6-content {
+      position: relative;
+      z-index: 60;
+      padding: 0 10vw 1vh;
+      padding-top: calc(1.5rem + 1.5rem + 40px + 5vh);
+      min-height: 100vh;
+    }
+    #slide6-content h1 {
+      font-size: 3rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    #slide6-content p {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #slide6-content a {
+      color: #7cb3ff;
+      text-decoration: none;
+    }
+    #slide6-content a:hover {
+      text-decoration: underline;
+    }
+    .founders {
+      margin-top: 2rem;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+    .founders a {
+      display: inline-block;
+      margin: 0 1rem;
+      font-size: 1.1rem;
+    }
+
+    /* Email signup form */
+    .signup-form {
+      max-width: 500px;
+      margin: 3rem auto;
+      text-align: center;
+    }
+    .signup-form p {
+      margin-bottom: 1rem;
+    }
+    .signup-form form {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .signup-form input[type="email"] {
+      flex: 1;
+      max-width: 300px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #444;
+      border-radius: 4px;
+      background: #2d2d2f;
+      color: #fff;
+    }
+    .signup-form input[type="email"]::placeholder {
+      color: #888;
+    }
+    .signup-form button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      background: #fff;
+      color: #1a1a1e;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .signup-form button:hover {
+      background: #ddd;
+    }
+
+    /* Debug panel */
+    #debug {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(0,0,0,0.8);
+      color: #0f0;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      z-index: 9999;
+      white-space: pre;
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/landing3-DDO6whW8.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="./assets/preload-helper-C1FmrZbK.js">
+</head>
+<body class="not-ready">
+  <div id="wordmark">TELEPATH</div>
+  <div id="down-arrow-wrapper"><div id="down-arrow">↓</div></div>
+  <div id="canvas-container"></div>
+  <div id="debug"></div>
+
+  <!-- Blurbs are now normal page content that scrolls naturally -->
+  <div id="blurb1" class="blurb">Amazing as it is, the personal computer is not a perfected thing.</div>
+  <div id="blurb2" class="blurb">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
+  <div id="blurb3" class="blurb">But now, they <em>can</em>.</div>
+  <div id="blurb5" class="blurb">The Jenga tower of computing is already toppling. Personal computing is about to be reinvented. Again.</div>
+
+  <!-- Slide 6: Normal page content -->
+  <div id="slide6-content">
+    <p>We see that the true power of AI isn't in mindless automation and generative slop, but rather in its ability to <em>understand users and their intent</em>. This creates the opportunity for a computing revolution even greater and more exciting than the shift from CLI to GUI forty years ago.</p>
+
+    <p>Telepath is building the software stack for this new personal computing experience, from first principles. We call it a <strong>sensemaking computer</strong>. It understands you as a unique user, and it uses that understanding to help you make sense of the flood of information that defines modern life. We believe this will result in a new kind of computer that is more powerful, useful, and <em>joyful</em> than anything that's come before. You can get a sneak peek of our thinking and plans <a href="https://www.youtube.com/watch?v=jEm5SkLMap0" target="_blank" rel="noopener">here</a>.</p>
+
+    <p>Please join our waitlist to follow our journey and get early access to our tools and technology.</p>
+
+    <div class="founders">
+      <a href="https://www.linkedin.com/in/stlhood/" target="_blank" rel="noopener">Stephen Hood</a>
+      <a href="https://www.linkedin.com/in/rupertmanfredi/" target="_blank" rel="noopener">Rupert Manfredi</a>
+      <a href="https://www.linkedin.com/in/yetanotherjosh/" target="_blank" rel="noopener">Josh Whiting</a>
+    </div>
+
+    <div class="signup-form">
+      <form action="#" method="post">
+        <input type="email" name="email" placeholder="your@email.com" required>
+        <button type="submit">Join waitlist</button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>
