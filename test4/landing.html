@@ -24,29 +24,57 @@
       opacity: 0 !important;
     }
 
-    /* Scroll container - height set by JS based on PAGE_HEIGHT_VH */
-    .scroll-container {
-      background: #1a1a1e;
+    /* Canvas wrapper - defines the scroll region where canvas is visible */
+    #canvas-wrapper {
+      position: relative;
+      /* Height = blurbs scroll region + 100vh for the sticky canvas */
+      /* This is approximate - the blurbs and slide6 will define the actual bounds */
     }
 
-    /* Fixed canvas container - opacity controlled by JS */
+    /* Sticky canvas container - sticks at top, pushed up when wrapper ends */
     #canvas-container {
-      position: fixed;
+      position: sticky;
       top: 0;
       left: 0;
-      width: 100vw;
+      width: 100%;
       height: 100vh;
       overflow: hidden;
       pointer-events: none;
       opacity: 0;
+      z-index: 1;
+      /* Negative margin so it doesn't add space to document flow */
+      margin-bottom: -100vh;
     }
     #canvas-container canvas {
-      transform: translateX(-25%);
-    }
-    canvas {
       display: block;
-      max-width: 100%;
-      max-height: 100%;
+      /* Fixed width matching the WebGL render size - CSS scales it to fit viewport */
+      /* The container has overflow:hidden so excess is clipped */
+      width: 100vw;
+      height: auto;
+      /* Shift left to keep tower visible */
+      transform: translateX(-25%) translateY(5%);
+    }
+
+    /* Responsive canvas - scale up at smaller viewports */
+    @media (max-width: 1200px) {
+      #canvas-container canvas {
+        width: 120vw;
+      }
+    }
+    @media (max-width: 900px) {
+      #canvas-container canvas {
+        width: 150vw;
+      }
+    }
+    @media (max-width: 600px) {
+      #canvas-container canvas {
+        width: 200vw;
+      }
+    }
+    @media (max-width: 400px) {
+      #canvas-container canvas {
+        width: 250vw;
+      }
     }
 
     /* Wordmark - static in top-left */
@@ -104,54 +132,103 @@
       50% { transform: translateX(-50%) translateY(10px); }
     }
 
-    /* Blurbs - fixed position text, opacity/transform controlled by JS */
+    /* Blurbs - normal page content with spacing */
+    /* Anchor blurbs - invisible, just for scroll position tracking */
     .blurb {
-      position: fixed;
+      position: relative;
       font-size: 1.5rem;
       line-height: 1.6;
-      z-index: 50;
-      opacity: 0;
+      /* Spacing between blurbs - creates scroll distance */
+      /* Use svh (small viewport height) to avoid iOS address bar resize issues */
+      /* svh = viewport height with address bar visible, never changes during scroll */
+      margin-bottom: 100svh;
+      /* Invisible but still takes up space and accessible to screen readers */
+      visibility: hidden;
     }
 
-    /* Blurb 1 - centered on screen */
+    /* Fixed overlay for display blurbs */
+    #blurb-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* Display blurbs - positioned absolutely within the fixed overlay */
+    .blurb-display {
+      position: absolute;
+      font-size: 1.5rem;
+      line-height: 1.6;
+      will-change: transform, opacity;
+    }
+
+    /* Anchor blurb 1 - centered, sets scroll geometry */
     #blurb1 {
-      top: 50vh;
+      margin-top: 50svh;
+      text-align: center;
+      font-size: 2rem;
+      padding: 0 10vw;
+    }
+
+    /* Anchor blurbs 2, 3, 5 - right side geometry */
+    #blurb2, #blurb3 {
+      width: 40vw;
+      margin-left: auto;
+      margin-right: 5vw;
+      text-align: right;
+    }
+    #blurb5 {
+      width: 40vw;
+      margin-left: auto;
+      margin-right: 5vw;
+      text-align: right;
+      margin-bottom: 50svh;
+    }
+
+    /* Display blurb 1 - centered */
+    #blurb1-display {
       left: 10vw;
       right: 10vw;
       text-align: center;
       font-size: 2rem;
     }
 
-    /* Blurb 2 - right side, top */
-    #blurb2 {
-      top: 15vh;
-      right: 5vw;
+    /* Display blurbs 2, 3, 5 - right side */
+    #blurb2-display, #blurb3-display, #blurb5-display {
       width: 40vw;
+      right: 5vw;
       text-align: right;
     }
 
-    /* Blurb 3 - right side, centered */
-    #blurb3 {
-      top: 50vh;
-      right: 5vw;
-      width: 40vw;
-      text-align: right;
+    /* Responsive anchor blurb sizing */
+    @media (max-width: 900px) {
+      #blurb1 { padding: 0 5vw; }
+      #blurb2, #blurb3, #blurb5 { width: 60vw; margin-right: 3vw; }
+      #blurb1-display { left: 5vw; right: 5vw; }
+      #blurb2-display, #blurb3-display, #blurb5-display { width: 60vw; right: 3vw; }
+    }
+    @media (max-width: 600px) {
+      #blurb1 { padding: 0 6vw; font-size: 1.5rem; }
+      #blurb2, #blurb3, #blurb5 { width: 50vw; margin-right: 6vw; font-size: 1.2rem; }
+      #blurb1-display { left: 6vw; right: 6vw; font-size: 1.5rem; }
+      #blurb2-display, #blurb3-display, #blurb5-display { width: 50vw; right: 6vw; font-size: 1.2rem; }
+    }
+    @media (max-width: 400px) {
+      #blurb1 { padding: 0 6vw; font-size: 1.3rem; }
+      #blurb2, #blurb3, #blurb5 { width: 90vw; margin-right: 4vw; font-size: 1.1rem; }
+      #blurb1-display { left: 6vw; right: 6vw; font-size: 1.3rem; }
+      #blurb2-display, #blurb3-display, #blurb5-display { width: 90vw; right: 4vw; font-size: 1.1rem; }
     }
 
-    /* Blurb 5 - right side, centered */
-    #blurb5 {
-      top: 50vh;
-      right: 5vw;
-      width: 40vw;
-      text-align: right;
-    }
-
-    /* Slide 6 - normal page content after scroll container */
+    /* Slide 6 - normal page content */
     #slide6-content {
       position: relative;
-      z-index: 60; /* Above canvas (no z-index) and blurbs (50) */
-      padding: 30vh 20% 1vh;
-      padding-top: calc(1.5rem + 1.5rem + 40px + 5vh); /* wordmark padding + font + gradient + spacing */
+      z-index: 60;
+      padding: 0 10vw 1vh;
+      padding-top: calc(1.5rem + 1.5rem + 40px + 5vh);
       min-height: 100vh;
     }
     #slide6-content h1 {
@@ -241,25 +318,35 @@
       white-space: pre;
     }
   </style>
-  <script type="module" crossorigin src="./assets/landing-C4MKd6Tm.js"></script>
+  <script type="module" crossorigin src="./assets/landing3-eCfpcNGy.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="./assets/preload-helper-C1FmrZbK.js">
 </head>
 <body class="not-ready">
   <div id="wordmark">TELEPATH</div>
   <div id="down-arrow-wrapper"><div id="down-arrow">↓</div></div>
-  <div id="canvas-container"></div>
   <div id="debug"></div>
 
-  <!-- Blurbs in reading order for accessibility (screen readers) -->
-  <div id="blurb1" class="blurb">Amazing as it is, the personal computer is not a perfected thing.</div>
-  <div id="blurb2" class="blurb">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
-  <div id="blurb3" class="blurb">But now, they <em>can</em>.</div>
-  <div id="blurb5" class="blurb">The Jenga tower of computing is already toppling. Personal computing is about to be reinvented. Again.</div>
+  <!-- Canvas wrapper - sticky canvas stays within this region -->
+  <div id="canvas-wrapper">
+    <div id="canvas-container"></div>
 
-  <div class="scroll-container"></div>
+    <!-- Anchor blurbs - invisible, for scroll position tracking (screen readers can still read them) -->
+    <div id="blurb1" class="blurb">Amazing as it is, the personal computer is not a perfected thing.</div>
+    <div id="blurb2" class="blurb">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
+    <div id="blurb3" class="blurb">But now, they <em>can</em>.</div>
+    <div id="blurb5" class="blurb">The Jenga tower of computing is already toppling. Personal computing is about to be reinvented. Again.</div>
 
-  <!-- Slide 6: Normal page content -->
+    <!-- Fixed overlay with display blurbs - positioned by JS -->
+    <div id="blurb-overlay" aria-hidden="true">
+      <div id="blurb1-display" class="blurb-display">Amazing as it is, the personal computer is not a perfected thing.</div>
+      <div id="blurb2-display" class="blurb-display">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
+      <div id="blurb3-display" class="blurb-display">But now, they <em>can</em>.</div>
+      <div id="blurb5-display" class="blurb-display">The Jenga tower of computing is already toppling. Personal computing is about to be reinvented. Again.</div>
+    </div>
+  </div>
+
+  <!-- Slide 6: Normal page content - outside wrapper so it pushes canvas up -->
   <div id="slide6-content">
     <p>We see that the true power of AI isn't in mindless automation and generative slop, but rather in its ability to <em>understand users and their intent</em>. This creates the opportunity for a computing revolution even greater and more exciting than the shift from CLI to GUI forty years ago.</p>
 
