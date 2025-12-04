@@ -195,6 +195,11 @@
       margin: 0 auto;
       z-index: 60;
       font-weight: 400;
+      /* center content in the final page, ensure it's a full page which also ensures the jenga tower fades out */
+      min-height: 90vh; /* approx 90 due to header */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     #manifesto h1 {
       font-size: 3rem;
