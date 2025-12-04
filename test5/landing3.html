@@ -59,27 +59,19 @@
     body.not-ready #down-arrow,
     body.not-ready .blurb,
     body.not-ready .blurb-display,
-    body.not-ready #slide6-content {
+    body.not-ready #manifesto {
       opacity: 0 !important;
     }
 
-    /* Canvas wrapper - defines the scroll region where canvas is visible */
-
-    #canvas-wrapper {
-      position: relative;
-      /* Height = blurbs scroll region + 100vh for the sticky canvas */
-      /* This is approximate - the blurbs and slide6 will define the actual bounds */
-    }
-
-    /* Sticky canvas container - sticks at top, pushed up when wrapper ends */
+    /* Fixed canvas container - completely decoupled from page layout */
 
     #canvas-container {
-      position: sticky;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      /* Let container size to canvas vertically, clip horizontal overflow */
-      overflow-x: hidden;
+      height: 100vh;
+      overflow: hidden;
       pointer-events: none;
       opacity: 0;
       z-index: 1;
@@ -92,33 +84,6 @@
       height: auto;
       /* Shift left to keep tower visible */
       transform: translateX(-25%) translateY(5%);
-    }
-
-    /* Responsive canvas - scale up at smaller viewports */
-
-    @media (max-width: 1200px) {
-      #canvas-container canvas {
-        width: 120%;
-      }
-    }
-
-    @media (max-width: 900px) {
-      #canvas-container canvas {
-        width: 150%;
-      }
-    }
-
-    @media (max-width: 600px) {
-      #canvas-container canvas {
-        width: 200%;
-      }
-    }
-
-    @media (max-width: 400px) {
-      #canvas-container canvas {
-        width: 400%;
-        transform: translateX(-27%) translateY(4%);
-      }
     }
 
     /* Wordmark - static in top-left */
@@ -186,9 +151,7 @@
       50% { transform: translateX(-50%) translateY(10px); }
     }
 
-    /* Blurbs - normal page content with spacing */
-
-    /* Anchor blurbs - invisible, just for scroll position tracking */
+    /* Anchor blurbs - invisible, define scroll geometry for position tracking */
 
     .blurb {
       position: relative;
@@ -200,6 +163,24 @@
       margin-bottom: 200svh;
       /* Invisible but still takes up space and accessible to screen readers */
       visibility: hidden;
+    }
+
+    #blurb5 {
+      /* A bit less space after the final blurb before the manifesto appears. */
+      margin-bottom: 150svh;
+    }
+
+    /* Debug mode - make anchor blurbs visible */
+
+    body.debug-mode .blurb {
+      visibility: visible;
+      background-color: rgba(0, 80, 0, 0.6);
+      color: #aaffaa;
+      padding: 1rem;
+      border: 2px dashed #00ff00;
+      position: relative;
+      z-index: 20;
+      opacity: 0.4;
     }
 
     /* Fixed overlay for display blurbs */
@@ -226,8 +207,6 @@
 
     /* Anchor blurb 1 - centered, sets scroll geometry */
 
-    /* Use flexbox to vertically center the content at 50svh */
-
     #blurb1 {
       margin-top: 50svh;
       transform: translateY(-50%);
@@ -238,19 +217,11 @@
 
     /* Anchor blurbs 2, 3, 5 - right side geometry */
 
-    #blurb2, #blurb3 {
+    #blurb2, #blurb3, #blurb5 {
       width: 40vw;
       margin-left: auto;
       margin-right: 5vw;
       text-align: right;
-    }
-
-    #blurb5 {
-      width: 40vw;
-      margin-left: auto;
-      margin-right: 5vw;
-      text-align: right;
-      margin-bottom: 50svh;
     }
 
     /* Display blurb 1 - centered */
@@ -270,70 +241,24 @@
       text-align: right;
     }
 
-    /* Responsive anchor blurb sizing */
+    /* manifesto page content */
 
-    @media (max-width: 900px) {
-      #blurb1 { padding: 0 5vw; }
-      #blurb2, #blurb3, #blurb5 { width: 60vw; margin-right: 3vw; }
-      #blurb1-display { left: 5vw; right: 5vw; }
-      #blurb2-display, #blurb3-display, #blurb5-display { width: 60vw; right: 3vw; }
-    }
-
-    @media (max-width: 600px) {
-      :root {
-        --blurb-font-size: 1.2rem;
-        --blurb1-font-size: 1.5rem;
-      }
-      #blurb1 { padding: 0 6vw; }
-      #blurb2, #blurb3, #blurb5 { width: 50vw; margin-right: 6vw; }
-      #blurb1-display { left: 6vw; right: 6vw; }
-      #blurb2-display, #blurb3-display, #blurb5-display { width: 50vw; right: 6vw; }
-    }
-
-    @media (max-width: 400px) {
-      :root {
-        --blurb-font-size: 1.6rem;
-        --blurb1-font-size: 1.6rem;
-      }
-      #blurb1 { padding: 0 6vw; }
-      #blurb1-display { left: 6vw; right: 6vw; }
-      #blurb2, #blurb3, #blurb5 {
-        width: 90vw; margin-left: auto; margin-right: auto; text-align: center;
-      }
-      #blurb2-display, #blurb3-display, #blurb5-display {
-        width: 90vw; left: 5vw; right: 5vw; text-align: center;
-        background-color: rgba(0,0,0,0.3);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-radius: 30px;
-        padding: 10px;
-      }
-    }
-
-    #blurb5 {
-      /* no margin below last blurb, keeps slide6 close to canvas. */
-      margin-bottom: 0 !important;
-    }
-
-    /* Slide 6 - normal page content */
-
-    #slide6-content {
+    #manifesto {
       position: relative;
       padding: 0 8vw;
       max-width: 70em;
       margin: 0 auto;
-      margin-top: -130px; /* closer to canvas content */
       z-index: 60;
       font-weight: 300;
     }
 
-    #slide6-content h1 {
+    #manifesto h1 {
       font-size: 3rem;
       margin-bottom: 2rem;
       text-align: center;
     }
 
-    #slide6-content p {
+    #manifesto p {
       font-size: 1.2rem;
       line-height: 1.8;
       margin-bottom: 1.5rem;
@@ -342,12 +267,12 @@
       margin-right: auto;
     }
 
-    #slide6-content a {
+    #manifesto a {
       color: #7cb3ff;
       text-decoration: none;
     }
 
-    #slide6-content a:hover {
+    #manifesto a:hover {
       text-decoration: underline;
     }
 
@@ -411,16 +336,6 @@
       background: #ddd;
     }
 
-    @media (max-width: 600px) {
-      .signup-form form {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .signup-form input[type="email"] {
-        max-width: none;
-      }
-    }
-
     /* Debug panel - hidden when empty */
 
     #debug:empty {
@@ -440,8 +355,106 @@
       z-index: 9999;
       white-space: pre;
     }
+
+    /* ==========================================================================
+       RESPONSIVE STYLES
+       ========================================================================== */
+
+    @media (max-width: 1200px) {
+      #canvas-container canvas {
+        width: 120%;
+      }
+    }
+
+    @media (max-width: 900px) {
+      #canvas-container canvas {
+        width: 150%;
+      }
+      #blurb1 {
+        padding: 0 5vw;
+      }
+      #blurb2, #blurb3, #blurb5 {
+        width: 60vw;
+        margin-right: 3vw;
+      }
+      #blurb1-display {
+        left: 5vw;
+        right: 5vw;
+      }
+      #blurb2-display, #blurb3-display, #blurb5-display {
+        width: 60vw;
+        right: 3vw;
+      }
+    }
+
+    @media (max-width: 600px) {
+      :root {
+        --blurb-font-size: 1.2rem;
+        --blurb1-font-size: 1.5rem;
+      }
+      #canvas-container canvas {
+        width: 200%;
+      }
+      #blurb1 {
+        padding: 0 6vw;
+      }
+      #blurb2, #blurb3, #blurb5 {
+        width: 50vw;
+        margin-right: 6vw;
+      }
+      #blurb1-display {
+        left: 6vw;
+        right: 6vw;
+      }
+      #blurb2-display, #blurb3-display, #blurb5-display {
+        width: 50vw;
+        right: 6vw;
+      }
+      .signup-form form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .signup-form input[type="email"] {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 400px) {
+      :root {
+        --blurb-font-size: 1.6rem;
+        --blurb1-font-size: 1.6rem;
+      }
+      #canvas-container canvas {
+        width: 400%;
+        transform: translateX(-27%) translateY(4%);
+      }
+      #blurb1 {
+        padding: 0 6vw;
+      }
+      #blurb1-display {
+        left: 6vw;
+        right: 6vw;
+      }
+      #blurb2, #blurb3, #blurb5 {
+        width: 90vw;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+      }
+      #blurb2-display, #blurb3-display, #blurb5-display {
+        width: 90vw;
+        left: 5vw;
+        right: 5vw;
+        text-align: center;
+        background-color: rgba(0,0,0,0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 30px;
+        padding: 10px;
+      }
+    }
   </style>
-  <script type="module" crossorigin src="./assets/landing3-BZDWqop1.js"></script>
+  <script type="module" crossorigin src="./assets/landing3-DEbZz5W1.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="./assets/preload-helper-C1FmrZbK.js">
 </head>
@@ -450,27 +463,25 @@
   <div id="down-arrow-wrapper"><div id="down-arrow">↓</div></div>
   <div id="debug"></div>
 
-  <!-- Canvas wrapper - sticky canvas stays within this region -->
-  <div id="canvas-wrapper">
-    <div id="canvas-container"></div>
+  <!-- Canvas - completely separate from page layout (position: fixed) -->
+  <div id="canvas-container"></div>
 
-    <!-- Anchor blurbs - invisible, for scroll position tracking (screen readers can still read them) -->
-    <div id="blurb1" class="blurb">Amazing as it is, the personal computer is not a perfected thing.</div>
-    <div id="blurb2" class="blurb">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
-    <div id="blurb3" class="blurb">But now, they <em>can</em>.</div>
-    <div id="blurb5" class="blurb">The Jenga tower is already toppling. Personal computing is about to be reinvented. Again.</div>
-
-    <!-- Fixed overlay with display blurbs - positioned by JS -->
-    <div id="blurb-overlay" aria-hidden="true">
-      <div id="blurb1-display" class="blurb-display">Amazing as it is, the personal computer is not a perfected thing.</div>
-      <div id="blurb2-display" class="blurb-display">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
-      <div id="blurb3-display" class="blurb-display">But now, they <em>can</em>.</div>
-      <div id="blurb5-display" class="blurb-display">The Jenga tower is already toppling. Personal computing is about to be reinvented. Again.</div>
-    </div>
+  <!-- Fixed overlay with display blurbs - positioned by JS -->
+  <div id="blurb-overlay" aria-hidden="true">
+    <div id="blurb1-display" class="blurb-display">Amazing as it is, the personal computer is not a perfected thing.</div>
+    <div id="blurb2-display" class="blurb-display">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
+    <div id="blurb3-display" class="blurb-display">But now, they <em>can</em>.</div>
+    <div id="blurb5-display" class="blurb-display">The Jenga tower is already toppling. Personal computing is about to be reinvented. Again.</div>
   </div>
 
-  <!-- Slide 6: Normal page content - outside wrapper so it pushes canvas up -->
-  <div id="slide6-content">
+  <!-- Anchor blurbs - invisible, for scroll position tracking (screen readers can still read them) -->
+  <div id="blurb1" class="blurb">Amazing as it is, the personal computer is not a perfected thing.</div>
+  <div id="blurb2" class="blurb">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
+  <div id="blurb3" class="blurb">But now, they <em>can</em>.</div>
+  <div id="blurb5" class="blurb">The Jenga tower is already toppling. Personal computing is about to be reinvented. Again.</div>
+
+  <!-- manifesto: Normal page content -->
+  <div id="manifesto">
     <p>We see that the true power of AI isn't in mindless automation and generative slop, but rather in its ability to <em>understand users and their intent</em>. This creates the opportunity for a computing revolution even greater and more exciting than the shift from CLI to GUI forty years ago.</p>
 
     <p>Telepath is building the software stack for this new personal computing experience, from first principles. We call it a <strong>sensemaking computer</strong>. It understands you as a unique user, and it uses that understanding to help you make sense of the flood of information that defines modern life. We believe this will result in a new kind of computer that is more powerful, useful, and <em>joyful</em> than anything that's come before. You can get a sneak peek of our thinking and plans <a href="https://www.youtube.com/watch?v=jEm5SkLMap0" target="_blank" rel="noopener">here</a>.</p>
