@@ -26,6 +26,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Esteban&family=IBM+Plex+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
+  <link rel="preload" href="./assets/animation-compressed-DugFizAW.json" as="fetch" crossorigin>
   <style>
 
     :root {
@@ -46,7 +47,7 @@
     }
 
     /* Hide UI elements until JS initializes */
-    body.not-ready #wordmark,
+    body.not-ready #header,
     body.not-ready #down-arrow,
     body.not-ready .blurb,
     body.not-ready .blurb-display,
@@ -78,24 +79,17 @@
       transform: translateX(-50%);
     }
 
-    /* Wordmark - static in top-left */
-    #wordmark {
+    /* Header bar - spans full width, contains wordmark */
+    #header {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      font-family: "IBM Plex Sans Condensed", sans-serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.25em;
       padding: 1.5rem;
       z-index: 100;
-      cursor: pointer;
-      color: inherit;
-      text-decoration: none;
     }
     /* Header bar background/border - opacity controlled by --header-bar-opacity */
-    #wordmark::before {
+    #header::before {
       content: '';
       position: absolute;
       top: 0;
@@ -108,7 +102,7 @@
       z-index: -1;
     }
     /* Gradient fade below header */
-    #wordmark::after {
+    #header::after {
       content: '';
       position: absolute;
       top: 100%;
@@ -118,6 +112,16 @@
       background: linear-gradient(to bottom, #1a1a1e, transparent);
       pointer-events: none;
       opacity: var(--header-bar-opacity, 0);
+    }
+    /* Wordmark - clickable text only */
+    #wordmark {
+      font-family: "IBM Plex Sans Condensed", sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      cursor: pointer;
+      color: inherit;
+      text-decoration: none;
     }
 
     /* Down arrow - wrapper handles position animation, inner handles opacity */
@@ -130,7 +134,7 @@
       animation: pulse 2s ease-in-out infinite;
     }
     #down-arrow {
-      font-size: 4rem;
+      font-size: 3rem;
       /* opacity controlled by JS */
     }
     @keyframes pulse {
@@ -146,12 +150,15 @@
       /* Spacing between blurbs - creates scroll distance */
       /* Use svh (small viewport height) to avoid iOS address bar resize issues */
       /* svh = viewport height with address bar visible, never changes during scroll */
+      /* Fallback for older browsers that don't support svh */
+      margin-bottom: 200vh;
       margin-bottom: 200svh;
-      /* Invisible but still takes up space and accessible to screen readers */
+      /* Invisible but still takes up space */
       visibility: hidden;
     }
     #blurb5 {
       /* A bit less space after the final blurb before the manifesto appears. */
+      margin-bottom: 150vh;
       margin-bottom: 150svh;
     }
 
@@ -189,6 +196,7 @@
 
     /* Anchor blurb 1 - centered, sets scroll geometry */
     #blurb1 {
+      margin-top: 50vh;
       margin-top: 50svh;
       transform: translateY(-50%);
     }
@@ -293,6 +301,15 @@
     }
     .signup-form button:hover {
       background: #ddd;
+    }
+    .signup-form button:focus-visible {
+      outline: 2px solid #7cb3ff;
+      outline-offset: 2px;
+    }
+    .signup-form input[type="email"]:focus {
+      outline: none;
+      border-color: #7cb3ff;
+      box-shadow: 0 0 0 2px rgba(124, 179, 255, 0.3);
     }
 
     /* Debug panel - hidden when empty */
@@ -425,12 +442,12 @@
       }
     }
   </style>
-  <script type="module" crossorigin src="./assets/landing3-4VwLyJ1H.js"></script>
+  <script type="module" crossorigin src="./assets/landing3-Iyqi8jm-.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="./assets/preload-helper-C1FmrZbK.js">
 </head>
 <body class="not-ready">
-  <a id="wordmark" href="/">TELEPATH</a>
+  <header id="header"><a id="wordmark" href="/">TELEPATH</a></header>
   <div id="down-arrow-wrapper"><div id="down-arrow">↓</div></div>
   <div id="debug"></div>
 
@@ -438,18 +455,18 @@
   <div id="canvas-container"></div>
 
   <!-- Fixed overlay with display blurbs - positioned by JS -->
-  <div id="blurb-overlay" aria-hidden="true">
+  <div id="blurb-overlay">
     <div id="blurb1-display" class="blurb-display">Amazing as it is, the personal computer is not a perfected thing.</div>
     <div id="blurb2-display" class="blurb-display">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
     <div id="blurb3-display" class="blurb-display">But now, they <em>can</em>.</div>
     <div id="blurb5-display" class="blurb-display">The Jenga tower is already toppling. Personal computing is about to be reinvented. Again.</div>
   </div>
 
-  <!-- Anchor blurbs - invisible, for scroll position tracking (screen readers can still read them) -->
-  <div id="blurb1" class="blurb">Amazing as it is, the personal computer is not a perfected thing.</div>
-  <div id="blurb2" class="blurb">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
-  <div id="blurb3" class="blurb">But now, they <em>can</em>.</div>
-  <div id="blurb5" class="blurb">The Jenga tower is already toppling. Personal computing is about to be reinvented. Again.</div>
+  <!-- Anchor blurbs - invisible, for scroll position tracking only (display blurbs are the visible version) -->
+  <div id="blurb1" class="blurb" aria-hidden="true">Amazing as it is, the personal computer is not a perfected thing.</div>
+  <div id="blurb2" class="blurb" aria-hidden="true">It's a wobbly tower made up of decades of decisions, all built upon a single assumption: that computers can't understand humans.</div>
+  <div id="blurb3" class="blurb" aria-hidden="true">But now, they <em>can</em>.</div>
+  <div id="blurb5" class="blurb" aria-hidden="true">The Jenga tower is already toppling. Personal computing is about to be reinvented. Again.</div>
 
   <!-- manifesto: Normal page content -->
   <div id="manifesto">
@@ -472,8 +489,8 @@
         target="popupwindow"
         onsubmit="window.open('https://buttondown.com/telepath', 'popupwindow')"
       >
-        <input type="email" name="email" placeholder="hello@example.com" id="bd-email">
-        <button type="submit">Subscribe</button>
+        <input type="email" name="email" placeholder="hello@example.com" id="bd-email" required>
+        <button type="submit" style="font-weight:normal">JOIN WAITLIST</button>
       </form>
     </div>
   </div>
