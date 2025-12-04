@@ -78,13 +78,11 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: 100vh;
-      overflow: hidden;
+      /* Let container size to canvas vertically, clip horizontal overflow */
+      overflow-x: hidden;
       pointer-events: none;
       opacity: 0;
       z-index: 1;
-      /* Negative margin so it doesn't add space to document flow */
-      margin-bottom: -100vh;
     }
 
     #canvas-container canvas {
@@ -119,10 +117,7 @@
     @media (max-width: 400px) {
       #canvas-container canvas {
         width: 400%;
-        transform: translateX(-27%) translateY(10%);
-      }
-      #slide6-content {
-        padding-top: 60vh !important;
+        transform: translateX(-27%) translateY(4%);
       }
     }
 
@@ -307,8 +302,6 @@
       }
       #blurb2-display, #blurb3-display, #blurb5-display {
         width: 90vw; left: 5vw; right: 5vw; text-align: center;
-      }
-      .blurb-display {
         background-color: rgba(0,0,0,0.3);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
@@ -317,15 +310,20 @@
       }
     }
 
+    #blurb5 {
+      /* no margin below last blurb, keeps slide6 close to canvas. */
+      margin-bottom: 0 !important;
+    }
+
     /* Slide 6 - normal page content */
 
     #slide6-content {
       position: relative;
+      padding: 0 8vw;
+      max-width: 70em;
+      margin: 0 auto;
+      margin-top: -130px; /* closer to canvas content */
       z-index: 60;
-      padding: 0 10vw 11vh;
-      /* note padding-top is overridden with !important in media queries above */
-      padding-top: calc(1.5rem + 1.5rem + 40px + 15vh);
-      min-height: 100vh;
       font-weight: 300;
     }
 
