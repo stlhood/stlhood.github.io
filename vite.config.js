@@ -9,8 +9,8 @@ export default defineConfig({
   root: 'src',
 
   build: {
-    // Output to dist/
-    outDir: '../dist',
+    // Output to docs/ for GitHub Pages
+    outDir: '../docs',
     emptyOutDir: true,
     rollupOptions: {
       input: {
